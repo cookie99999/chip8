@@ -15,23 +15,23 @@ public class MachineScreen {
     }
 
     public int getWidth() {
-	return this.xmax * scale;
+	return xmax * scale;
     }
 
     public int getHeight() {
-	return this.ymax * scale;
+	return ymax * scale;
     }
 
     public void setPixel(int x, int y, int color) {
 	//todo: bound checking
 
-	this.pixels[y * xmax + x] = color;
+	pixels[y * xmax + x] = color;
     }
 
     public int getPixel(int x, int y) {
 	//todo: bound checking
 
-	return this.pixels[y * xmax + x];
+	return pixels[y * xmax + x];
     }
 
     public void drawSpriteLine(int x, int y, byte line) {
@@ -41,8 +41,8 @@ public class MachineScreen {
     }
 
     public void draw(Graphics g) {
-	for (int x = 0; x < this.xmax; x++) {
-	    for (int y = 0; y < this.ymax; y++) {
+	for (int x = 0; x < xmax; x++) {
+	    for (int y = 0; y < ymax; y++) {
 		Color c;
 		switch (getPixel(x, y)) {
 		case 0:
@@ -57,7 +57,7 @@ public class MachineScreen {
 		    break;
 		}
 		g.setColor(c);
-		g.fillRect(x * this.scale, y * this.scale, scale, scale);
+		g.fillRect(x * scale, y * scale, scale, scale);
 	    }
 	}
     }

@@ -29,7 +29,7 @@ public class CPU {
 
     private void debugPrint(short opcode) {
 	System.out.println(String.format("%04x\npc: %04x ir: %04x delay: %02x sound: %02x",
-					 opcode, this.pc, this.ir, this.delay_timer, this.sound_timer));
+					 opcode, pc, ir, delay_timer, sound_timer));
 	for (byte i = 0; i < 16; i++)
 	    System.out.print(String.format("V%x: %02x ", i, registers[i]));
 	System.out.println();
@@ -37,11 +37,11 @@ public class CPU {
     
     public void writeMem(short address, byte data) {
 	//check for errors
-	this.memory[address] = data;
+	memory[address] = data;
     }
     
     public void step() {
-	short opcode = (short)((this.memory[this.pc] << 8) | (this.memory[this.pc + 1]));
+	short opcode = (short)((memory[pc] << 8) | (memory[pc + 1]));
 	byte op = (byte)((opcode & 0xf000) >>> 12);
 	byte x = (byte)((opcode & 0x0f00) >>> 8);
 	byte y = (byte)((opcode & 0x00f0) >>> 4);
@@ -49,10 +49,10 @@ public class CPU {
 	byte nn = (byte)(opcode & 0x00ff);
 	short nnn = (short)(opcode & 0x0fff);
 
-	if (this.isDebug)
+	if (isDebug)
 	    debugPrint(opcode);
 
-	this.pc += 2; //increment before execution so jmp won't be messed up
+	pc += 2; //increment before execution so jmp won't be messed up
 	
 	switch (op) {
 	case 0x0:
@@ -61,24 +61,24 @@ public class CPU {
 	    }
 	    break;
 	case 0x1:
-	    this.pc = nnn;
+	    pc = nnn;
 	    break;
 	case 0x6:
-	    this.registers[x] = nn;
+	    registers[x] = nn;
 	    break;
 	case 0x7:
-	    this.registers[x] += nn;
+	    registers[x] += nn;
 	    break;
 	case 0xa:
-	    this.ir = nnn;
+	    ir = nnn;
 	    break;
 	case 0xd:
-	    int xcoord = this.registers[x] % 64;
-	    int ycoord = this.registers[y] % 32;
+	    int xcoord = registers[x] % 64;
+	    int ycoord = registers[y] % 32;
 	    
 	    for (int i = 0; i < n; i++) {
-		byte line = this.memory[this.ir + i];
-		this.screen.drawSpriteLine(xcoord, ycoord + i, line);
+		byte line = memory[ir + i];
+		screen.drawSpriteLine(xcoord, ycoord + i, line);
 	    }
 	    break;
 	default:
