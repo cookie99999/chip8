@@ -89,6 +89,48 @@ public class CPU {
 	case 0x7:
 	    registers[x] += nn;
 	    break;
+	case 0x8:
+	    switch (n) {
+	    case 0x0:
+		registers[x] = registers[y];
+		break;
+	    case 0x1:
+		registers[x] |= registers[y];
+		break;
+	    case 0x2:
+		registers[x] &= registers[y];
+		break;
+	    case 0x3:
+		registers[x] ^= registers[y];
+		break;
+	    case 0x4:
+		registers[0xf] = (byte)((int)(registers[x] + registers[y]) > 255 ? 1 : 0);
+		registers[x] += registers[y];
+		break;
+	    case 0x5:
+		registers[0xf] = (byte)((registers[x] > registers[y]) ? 1 : 0);
+		registers[x] = (byte)(registers[x] - registers[y]);
+		break;
+	    case 0x6:
+		//todo: configurable for old behavior
+		registers[0xf] = (byte)(registers[x] & 1);
+		registers[x] >>>= 1;
+		break;
+	    case 0x7:
+		registers[0xf] = (byte)((registers[y] > registers[x]) ? 1 : 0);
+		registers[x] = (byte)(registers[y] - registers[x]);
+		break;
+	    case 0xe:
+		//todo: configurable for old behavior
+		registers[0xf] = (byte)((registers[x] & 0x80) >>> 1);
+		registers[x] <<= 1;
+		break;
+	    default:
+		System.out.println(String.format("<ERROR> unimplented opcode %04x", opcode));
+		System.exit(-1);
+		break;
+	    }
+	    break;
 	case 0xa:
 	    ir = nnn;
 	    break;
