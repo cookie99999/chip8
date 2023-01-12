@@ -29,7 +29,7 @@ public class CPU {
     }
     
     public void writeMem(short address, byte data) {
-	//check errors
+	//check for errors
 	this.memory[address] = data;
     }
     

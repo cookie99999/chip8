@@ -19,7 +19,7 @@ public class Chip8 {
     public static void main(String[] args) {
 	byte[] bin = null;
 	try {
-	    bin = loadBin(args[0]);
+	    bin = loadBin(args[0]); //todo: check it's a valid path
 	} catch (ArrayIndexOutOfBoundsException e) {
 	    System.out.println("Usage: java Chip8 <bin file path>");
 	    System.out.println(e);
