@@ -2,10 +2,22 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import javax.swing.*;
-import java.awt.Graphics;
-import java.awt.BorderLayout;
+import java.awt.*;
+import java.awt.event.*;
 
 public class Chip8 {
+    private static void createAndShowUI(MachineScreen screen) {
+	JFrame frame = new JFrame("Chip8");
+	DisplayPanel dp = new DisplayPanel(screen);
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	frame.setLayout(new BorderLayout());
+	frame.add(dp);
+	frame.pack();
+	frame.setLocationRelativeTo(null);
+	frame.setVisible(true);
+	dp.startDisplay();
+    }
+    
     public static byte[] loadBin(String path) {
 	Path p = Paths.get(path);
 	byte[] data = null;
@@ -37,18 +49,17 @@ public class Chip8 {
 	    System.exit(-1);
 	}
 
+	EventQueue.invokeLater(new Runnable()
+	    {
+		public void run() {
+		    createAndShowUI(screen);
+		}
+	    });
+	
 	for (short i = 0; i < binLen; i++) {
 	    cpu.writeMem((short)(0x200 + i), bin[i]);
 	}
-
-	JFrame frame = new JFrame("Chip8");
-	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setLayout(new BorderLayout());
-	frame.add(new DisplayPanel(screen));
-	frame.pack();
-	frame.setLocationRelativeTo(null);
-	frame.setVisible(true);
-
+	
 	while (true) {
 	    cpu.step();
 	}

@@ -7,7 +7,7 @@ public class CPU {
     private byte sound_timer;
     private byte[] registers = new byte[16];
 
-    private boolean isDebug = true;
+    private boolean isDebug = false;
 
     private MachineScreen screen;
     
@@ -73,7 +73,13 @@ public class CPU {
 	    this.ir = nnn;
 	    break;
 	case 0xd:
-	    System.out.println("<DEBUG> drew " + n + "to " + registers[x] + ", " + registers[y]);
+	    int xcoord = this.registers[x] % 64;
+	    int ycoord = this.registers[y] % 32;
+	    
+	    for (int i = 0; i < n; i++) {
+		byte line = this.memory[this.ir + i];
+		this.screen.drawSpriteLine(xcoord, ycoord + i, line);
+	    }
 	    break;
 	default:
 	    System.out.println("<ERROR> unimplemented opcode " + String.format("%04x", opcode));

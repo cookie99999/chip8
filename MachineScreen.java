@@ -35,8 +35,8 @@ public class MachineScreen {
     }
 
     public void drawSpriteLine(int x, int y, byte line) {
-	for (int i = 0; i < 8; i++) {
-	    setPixel(x + i, y, ((line >>> i) & 1) == 1 ? 1 : 0);
+	for (int i = 7; i >= 0; i--) {
+	    setPixel(x + (7 - i), y, ((line >>> i) & 1) == 1 ? 1 : 0);
 	}
     }
 
