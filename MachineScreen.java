@@ -34,10 +34,24 @@ public class MachineScreen {
 	return pixels[y * xmax + x];
     }
 
-    public void drawSpriteLine(int x, int y, byte line) {
-	for (int i = 7; i >= 0; i--) {
-	    setPixel(x + (7 - i), y, ((line >>> i) & 1) == 1 ? 1 : 0);
+    public void clear() {
+	for (int x = 0; x < xmax; x++) {
+	    for (int y = 0; y < ymax; y++) {
+		setPixel(x, y, 0);
+	    }
 	}
+    }
+
+    public boolean drawSpriteLine(int x, int y, byte line) {
+	boolean collided = false;
+	for (int i = 7; i >= 0; i--) {
+	    int tmp = getPixel(x + (7 - i), y);
+	    setPixel(x + (7 - i), y, ((line >>> i) & 1) == 1 ? 1 : 0);
+	    if (tmp == 1 && getPixel(x + (7 - i), y) == 0) { //pixel turned off
+		collided = true;
+	    }
+	}
+	return collided;
     }
 
     public void draw(Graphics g) {

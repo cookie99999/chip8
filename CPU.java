@@ -6,20 +6,25 @@ public class CPU {
     private byte delay_timer;
     private byte sound_timer;
     private byte[] registers = new byte[16];
+    private short[] stack = new short[16];
+    private int sp;
 
     private boolean isDebug = false;
 
     private MachineScreen screen;
     
-    public void CPU() {
+    public CPU() {
 	this.pc = 0x200;
 	this.ir = 0;
 	this.delay_timer = (byte)0xff;
 	this.sound_timer = 0;
+	this.sp = 0;
 	for (byte b : registers)
 	    b = 0;
 	for (byte b : memory)
 	    b = 0;
+	for (short s : stack)
+	    s = 0;
 	this.screen = null;
     }
 
@@ -41,7 +46,7 @@ public class CPU {
     }
     
     public void step() {
-	short opcode = (short)((memory[pc] << 8) | (memory[pc + 1]));
+	short opcode = (short)((memory[pc] << 8) | (memory[pc + 1] & 0xff));
 	byte op = (byte)((opcode & 0xf000) >>> 12);
 	byte x = (byte)((opcode & 0x0f00) >>> 8);
 	byte y = (byte)((opcode & 0x00f0) >>> 4);
@@ -57,11 +62,26 @@ public class CPU {
 	switch (op) {
 	case 0x0:
 	    if (opcode == 0x00e0) {
-		System.out.println("<DEBUG> screen cleared");
+		screen.clear();
+	    } else if (opcode == 0x00ee) {
+		pc = stack[sp];
+		sp--; //todo: bounds checking
 	    }
 	    break;
 	case 0x1:
 	    pc = nnn;
+	    break;
+	case 0x3:
+	    if (registers[x] == nn)
+		pc += 2;
+	    break;
+	case 0x4:
+	    if (registers[x] != nn)
+		pc += 2;
+	    break;
+	case 0x5:
+	    if (registers[x] == registers[y])
+		pc += 2;
 	    break;
 	case 0x6:
 	    registers[x] = nn;
@@ -78,11 +98,13 @@ public class CPU {
 	    
 	    for (int i = 0; i < n; i++) {
 		byte line = memory[ir + i];
-		screen.drawSpriteLine(xcoord, ycoord + i, line);
+		boolean collided = screen.drawSpriteLine(xcoord, ycoord + i, line);
+		registers[0xf] = (byte)(collided ? 1 : 0);
 	    }
 	    break;
 	default:
 	    System.out.println("<ERROR> unimplemented opcode " + String.format("%04x", opcode));
+	    System.exit(-1);
 	}
     }
 }
