@@ -9,6 +9,8 @@ public class CPU {
 
     private boolean isDebug = true;
 
+    private MachineScreen screen;
+    
     public void CPU() {
 	this.pc = 0x200;
 	this.ir = 0;
@@ -18,6 +20,11 @@ public class CPU {
 	    b = 0;
 	for (byte b : memory)
 	    b = 0;
+	this.screen = null;
+    }
+
+    public void setScreen(MachineScreen s) {
+	this.screen = s;
     }
 
     private void debugPrint(short opcode) {
@@ -29,7 +36,7 @@ public class CPU {
     }
     
     public void writeMem(short address, byte data) {
-	//check errors
+	//check for errors
 	this.memory[address] = data;
     }
     
