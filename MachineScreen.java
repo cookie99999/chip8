@@ -25,13 +25,13 @@ public class MachineScreen {
     public void setPixel(int x, int y, int color) {
 	//todo: bound checking
 
-	pixels[y * xmax + x] = color;
+	pixels[(y & 31) * xmax + (x & 63)] = color;
     }
 
     public int getPixel(int x, int y) {
 	//todo: bound checking
 
-	return pixels[y * xmax + x];
+	return pixels[(y & 31) * xmax + (x & 63)];
     }
 
     public void clear() {

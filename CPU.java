@@ -64,8 +64,8 @@ public class CPU {
 	    if (opcode == 0x00e0) {
 		screen.clear();
 	    } else if (opcode == 0x00ee) {
-		pc = stack[sp];
-		sp--; //todo: bounds checking
+		pc = stack[sp--];
+		//todo: bounds checking
 	    }
 	    break;
 	case 0x1:
@@ -73,6 +73,10 @@ public class CPU {
 		System.out.println("<DEBUG> infinite loop entered, quitting...");
 		System.exit(0);
 	    }
+	    pc = nnn;
+	    break;
+	case 0x2:
+	    stack[sp++] = pc; //todo: check bounds
 	    pc = nnn;
 	    break;
 	case 0x3:
@@ -135,8 +139,19 @@ public class CPU {
 		break;
 	    }
 	    break;
+	case 0x9:
+	    if (registers[x] != registers[y])
+		pc += 2;
+	    break;
 	case 0xa:
 	    ir = nnn;
+	    break;
+	case 0xb:
+	    //todo: configurable chip-48 behavior
+	    pc = (short)(nnn + registers[0]); //todo: check bounds
+	    break;
+	case 0xc:
+	    registers[x] = (byte)((byte)(Math.random() * 256) & nn);
 	    break;
 	case 0xd:
 	    int xcoord = registers[x] % 64;
@@ -150,14 +165,33 @@ public class CPU {
 	    break;
 	case 0xf:
 	    switch (nn) {
+	    case 0x07:
+		registers[x] = delay_timer;
+		break;
+	    case 0x15:
+		delay_timer = registers[x];
+		break;
+	    case 0x18:
+		sound_timer = registers[x];
+		break;
+	    case 0x1e:
+		//todo: configurable old behavior
+		ir += registers[x];
+		if (ir > 0x0fff) {
+		    registers[0xf] = 1;
+		    ir = (short)(0 + (ir - 0x0fff));
+		}
+		break;
 	    case 0x29:
 		ir = (short)(0x0050 + ((registers[x] & 0x0f) * 5)); //5 bytes per char
 		break;
 	    case 0x33: //bcd
 		int first, second, third;
-		third = registers[x] % 10;
-		second = (registers[x] / 10) % 10;
-		first = (registers[x] / 100) % 10;
+		int tens = Integer.divideUnsigned(registers[x] & 0xff, 10);
+		int hundreds = Integer.divideUnsigned(registers[x] & 0xff, 100);
+		third = Integer.remainderUnsigned(registers[x] & 0xff, 10);
+		second = Integer.remainderUnsigned(tens, 10);
+		first = Integer.remainderUnsigned(hundreds, 10);
 		writeMem(ir, (byte)first);
 		writeMem((short)(ir + 1), (byte)second);
 		writeMem((short)(ir + 2), (byte)third);
