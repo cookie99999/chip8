@@ -2,3 +2,5 @@
 *.class
 *.class*
 *.ch8
+*.bin
+*.bak

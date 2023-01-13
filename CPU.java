@@ -69,6 +69,10 @@ public class CPU {
 	    }
 	    break;
 	case 0x1:
+	    if ((pc - 2) == nnn && isDebug) {
+		System.out.println("<DEBUG> infinite loop entered, quitting...");
+		System.exit(0);
+	    }
 	    pc = nnn;
 	    break;
 	case 0x3:
@@ -122,7 +126,7 @@ public class CPU {
 		break;
 	    case 0xe:
 		//todo: configurable for old behavior
-		registers[0xf] = (byte)((registers[x] & 0x80) >>> 1);
+		registers[0xf] = (byte)((registers[x] & 0x80) >>> 7);
 		registers[x] <<= 1;
 		break;
 	    default:
@@ -144,9 +148,42 @@ public class CPU {
 		registers[0xf] = (byte)(collided ? 1 : 0);
 	    }
 	    break;
+	case 0xf:
+	    switch (nn) {
+	    case 0x29:
+		ir = (short)(0x0050 + ((registers[x] & 0x0f) * 5)); //5 bytes per char
+		break;
+	    case 0x33: //bcd
+		int first, second, third;
+		third = registers[x] % 10;
+		second = (registers[x] / 10) % 10;
+		first = (registers[x] / 100) % 10;
+		writeMem(ir, (byte)first);
+		writeMem((short)(ir + 1), (byte)second);
+		writeMem((short)(ir + 2), (byte)third);
+		break;
+	    case 0x55:
+		//todo: configurable old behavior
+		for (int i = 0; i <= x; i++) {
+		    writeMem((short)(ir + i), registers[i]);
+		}
+		break;
+	    case 0x65:
+		//todo: configurable old behavior
+		for (int i = 0; i <= x; i++) {
+		    registers[i] = memory[ir + i];
+		}
+		break;
+	    default:
+		System.out.println("<ERROR> unimplemented opcode " + String.format("%04x", opcode));
+	    System.exit(-1);
+	    break;
+	    }
+	    break;
 	default:
 	    System.out.println("<ERROR> unimplemented opcode " + String.format("%04x", opcode));
 	    System.exit(-1);
+	    break;
 	}
     }
 }

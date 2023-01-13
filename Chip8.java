@@ -40,12 +40,29 @@ public class Chip8 {
 	    System.out.println(e);
 	    System.exit(0);
 	}
+
+	byte[] font = null;
+	try {
+	    font = loadBin("font.bin"); //todo: configurable font
+	} catch (Exception e) {
+	    System.out.println("<ERROR> failed loading font");
+	    System.out.println(e);
+	    System.exit(-1);
+	}
+	
 	CPU cpu = new CPU();
 	MachineScreen screen = new MachineScreen(4); //todo: user settable scale
 	cpu.setScreen(screen);
+	
 	int binLen = bin.length;
 	if (binLen > 4096 - 0x200) {
 	    System.out.println("<ERROR> input file too large");
+	    System.exit(-1);
+	}
+
+	int fontLen = font.length;
+	if (fontLen != 5 * 16) {
+	    System.out.println("<ERROR> font file size incorrect: " + fontLen);
 	    System.exit(-1);
 	}
 
@@ -58,6 +75,10 @@ public class Chip8 {
 	
 	for (short i = 0; i < binLen; i++) {
 	    cpu.writeMem((short)(0x200 + i), bin[i]);
+	}
+
+	for (short i = 0; i < fontLen; i++) {
+	    cpu.writeMem((short)(0x50 + i), font[i]);
 	}
 	
 	while (true) {
