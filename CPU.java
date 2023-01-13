@@ -1,4 +1,6 @@
-public class CPU {
+import java.awt.event.*;
+
+public class CPU implements ActionListener {
     private byte[] memory = new byte[4096];
     
     private short pc;
@@ -12,11 +14,12 @@ public class CPU {
     private boolean isDebug = false;
 
     private MachineScreen screen;
+    private KeyPad keypad;
     
     public CPU() {
 	this.pc = 0x200;
 	this.ir = 0;
-	this.delay_timer = (byte)0xff;
+	this.delay_timer = 0;
 	this.sound_timer = 0;
 	this.sp = 0;
 	for (byte b : registers)
@@ -28,8 +31,17 @@ public class CPU {
 	this.screen = null;
     }
 
+    public void actionPerformed(ActionEvent e) {
+	delay_timer -= (delay_timer > 0) ? 1 : 0;
+	sound_timer -= (sound_timer > 0) ? 1 : 0;
+    }
+
     public void setScreen(MachineScreen s) {
 	this.screen = s;
+    }
+
+    public void setKeyPad(KeyPad p) {
+	this.keypad = p;
     }
 
     private void debugPrint(short opcode) {
@@ -64,7 +76,7 @@ public class CPU {
 	    if (opcode == 0x00e0) {
 		screen.clear();
 	    } else if (opcode == 0x00ee) {
-		pc = stack[sp--];
+		pc = stack[--sp];
 		//todo: bounds checking
 	    }
 	    break;
@@ -154,8 +166,8 @@ public class CPU {
 	    registers[x] = (byte)((byte)(Math.random() * 256) & nn);
 	    break;
 	case 0xd:
-	    int xcoord = registers[x] % 64;
-	    int ycoord = registers[y] % 32;
+	    int xcoord = registers[x];
+	    int ycoord = registers[y];
 	    
 	    for (int i = 0; i < n; i++) {
 		byte line = memory[ir + i];
@@ -163,10 +175,27 @@ public class CPU {
 		registers[0xf] = (byte)(collided ? 1 : 0);
 	    }
 	    break;
+	case 0xe:
+	    if (nn == 0x9e) {
+		pc += keypad.getKey(registers[x]) ? 2 : 0;
+	    } else if (nn == 0xa1) {
+		pc += keypad.getKey(registers[x]) ? 0 : 2;
+	    }
+	    break;
 	case 0xf:
 	    switch (nn) {
 	    case 0x07:
 		registers[x] = delay_timer;
+		break;
+	    case 0x0a:
+		pc -= 2;
+		for (int i = 0; i < 16; i++) {
+		    if(keypad.getKey(i)) {
+			registers[x] = (byte)i;
+			pc += 2;
+			break;
+		    }
+		}
 		break;
 	    case 0x15:
 		delay_timer = registers[x];

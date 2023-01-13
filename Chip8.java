@@ -6,12 +6,13 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Chip8 {
-    private static void createAndShowUI(MachineScreen screen) {
+    private static void createAndShowUI(MachineScreen screen, KeyPad kp) {
 	JFrame frame = new JFrame("Chip8");
 	DisplayPanel dp = new DisplayPanel(screen);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	frame.setLayout(new BorderLayout());
 	frame.add(dp);
+	frame.addKeyListener(kp);
 	frame.pack();
 	frame.setLocationRelativeTo(null);
 	frame.setVisible(true);
@@ -52,6 +53,8 @@ public class Chip8 {
 	
 	CPU cpu = new CPU();
 	MachineScreen screen = new MachineScreen(4); //todo: user settable scale
+	KeyPad kp = new KeyPad();
+	cpu.setKeyPad(kp);
 	cpu.setScreen(screen);
 	
 	int binLen = bin.length;
@@ -69,7 +72,7 @@ public class Chip8 {
 	EventQueue.invokeLater(new Runnable()
 	    {
 		public void run() {
-		    createAndShowUI(screen);
+		    createAndShowUI(screen, kp);
 		}
 	    });
 	
@@ -80,7 +83,9 @@ public class Chip8 {
 	for (short i = 0; i < fontLen; i++) {
 	    cpu.writeMem((short)(0x50 + i), font[i]);
 	}
-	
+
+	Timer t = new Timer(1000/60, cpu);
+	t.start();
 	while (true) {
 	    cpu.step();
 	}
