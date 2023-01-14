@@ -46,7 +46,7 @@ public class MachineScreen {
 	boolean collided = false;
 	for (int i = 7; i >= 0; i--) {
 	    int tmp = getPixel(x + (7 - i), y);
-	    setPixel(x + (7 - i), y, ((line >>> i) & 1) == 1 ? 1 : 0);
+	    setPixel(x + (7 - i), y, ((line >>> i) & 1) ^ tmp);
 	    if (tmp == 1 && getPixel(x + (7 - i), y) == 0) { //pixel turned off
 		collided = true;
 	    }

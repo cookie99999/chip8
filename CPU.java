@@ -168,12 +168,14 @@ public class CPU implements ActionListener {
 	case 0xd:
 	    int xcoord = registers[x];
 	    int ycoord = registers[y];
+	    boolean collided = false;
 	    
 	    for (int i = 0; i < n; i++) {
 		byte line = memory[ir + i];
-		boolean collided = screen.drawSpriteLine(xcoord, ycoord + i, line);
-		registers[0xf] = (byte)(collided ? 1 : 0);
+		if (!collided)
+		    collided = screen.drawSpriteLine(xcoord, ycoord + i, line);
 	    }
+	    registers[0xf] = (byte)(collided ? 1 : 0);
 	    break;
 	case 0xe:
 	    if (nn == 0x9e) {
