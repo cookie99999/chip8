@@ -2,16 +2,18 @@ import java.awt.Graphics;
 import java.awt.Color;
 
 public class MachineScreen {
-    private final int xmax = 64;
-    private final int ymax = 32;
+    private int xmax = 64;
+    private int ymax = 32;
     private int scale;
-    private int[] pixels = new int[xmax * ymax];
+    private int[] pixels = null;
 
-    public MachineScreen(int scale) {
-	for (int i : pixels) {
-	    i = 0;
-	}
+    public MachineScreen(int xmax, int ymax, int scale) {
 	this.scale = scale;
+	this.xmax = xmax;
+	this.ymax = ymax;
+	this.pixels = new int[xmax * ymax];
+	for (int i : pixels)
+	    i = 0;
     }
 
     public int getWidth() {

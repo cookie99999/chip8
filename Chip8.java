@@ -52,7 +52,7 @@ public class Chip8 {
 	}
 	
 	CPU cpu = new CPU();
-	MachineScreen screen = new MachineScreen(4); //todo: user settable scale
+	MachineScreen screen = new MachineScreen(64, 32, 4); //todo: user settable scale
 	KeyPad kp = new KeyPad();
 	cpu.setKeyPad(kp);
 	cpu.setScreen(screen);
