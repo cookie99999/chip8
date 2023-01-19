@@ -178,10 +178,15 @@ public class CPU implements ActionListener {
 	    registers[0xf] = (byte)(collided ? 1 : 0);
 	    break;
 	case 0xe:
-	    if (nn == 0x9e) {
+	    switch (nn) {
+	    case (byte)0x9e:
 		pc += keypad.getKey(registers[x]) ? 2 : 0;
-	    } else if (nn == 0xa1) {
+		break;
+	    case (byte)0xa1:
 		pc += keypad.getKey(registers[x]) ? 0 : 2;
+		break;
+	    default:
+		break;
 	    }
 	    break;
 	case 0xf:
