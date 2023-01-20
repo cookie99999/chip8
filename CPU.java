@@ -149,7 +149,7 @@ public class CPU implements ActionListener {
 	    case 0x6:
 		//todo: configurable for old behavior
 		registers[0xf] = (byte)(registers[x] & 1);
-		registers[x] >>>= 1;
+		registers[x] = (byte)((registers[x] & 0xff) >>> 1);
 		break;
 	    case 0x7:
 		registers[0xf] = (byte)((registers[y] > registers[x]) ? 1 : 0);
@@ -227,7 +227,7 @@ public class CPU implements ActionListener {
 		break;
 	    case 0x1e:
 		//todo: configurable old behavior
-		ir += registers[x];
+		ir += (short)(registers[x] & 0xff);
 		if (ir > 0x0fff) {
 		    registers[0xf] = 1;
 		    ir = (short)(0 + (ir - 0x0fff));
