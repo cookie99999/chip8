@@ -88,8 +88,9 @@ public class CPU implements ActionListener {
 	    if (opcode == 0x00e0) {
 		screen.clear();
 	    } else if (opcode == 0x00ee) {
-		pc = stack[--sp];
-		//todo: bounds checking
+		if (--sp < 0)
+		    sp = 0;
+		pc = stack[sp];
 	    }
 	    break;
 	case 0x1:
@@ -100,7 +101,9 @@ public class CPU implements ActionListener {
 	    pc = nnn;
 	    break;
 	case 0x2:
-	    stack[sp++] = pc; //todo: check bounds
+	    stack[sp] = pc;
+	    if (++sp > 15)
+		sp = 15;
 	    pc = nnn;
 	    break;
 	case 0x3:
