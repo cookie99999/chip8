@@ -139,26 +139,40 @@ public class CPU implements ActionListener {
 		registers[x] ^= registers[y];
 		break;
 	    case 0x4:
-		registers[0xf] = (byte)((int)(registers[x] + registers[y]) > 255 ? 1 : 0);
+		byte tmp = registers[x];
 		registers[x] += registers[y];
+		if (Integer.compareUnsigned((int)((tmp & 0xff) + (registers[y] & 0xff)), 255) > 0)
+		    registers[0xf] = 1;
+		else
+		    registers[0xf] = 0;
 		break;
 	    case 0x5:
-		registers[0xf] = (byte)((registers[x] > registers[y]) ? 1 : 0);
+		tmp = registers[x];
 		registers[x] = (byte)(registers[x] - registers[y]);
+		if (Integer.compareUnsigned(tmp, registers[y]) > 0)
+		    registers[0xf] = 1;
+		else
+		    registers[0xf] = 0;
 		break;
 	    case 0x6:
 		//todo: configurable for old behavior
-		registers[0xf] = (byte)(registers[x] & 1);
+		tmp = (byte)(registers[x] & 1);
 		registers[x] = (byte)((registers[x] & 0xff) >>> 1);
+		registers[0xf] = tmp;
 		break;
 	    case 0x7:
-		registers[0xf] = (byte)((registers[y] > registers[x]) ? 1 : 0);
+		tmp = registers[x];
 		registers[x] = (byte)(registers[y] - registers[x]);
+		if (Integer.compareUnsigned(registers[y], tmp) > 0)
+		    registers[0xf] = 1;
+		else
+		    registers[0xf] = 0;
 		break;
 	    case 0xe:
 		//todo: configurable for old behavior
-		registers[0xf] = (byte)((registers[x] & 0x80) >>> 7);
+		tmp = (byte)((registers[x] & 0x80) >>> 7);
 		registers[x] <<= 1;
+		registers[0xf] = tmp;
 		break;
 	    default:
 		System.out.println(String.format("<ERROR> unimplented opcode %04x", opcode));
