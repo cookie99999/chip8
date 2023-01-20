@@ -187,9 +187,8 @@ public class CPU implements ActionListener {
 	    
 	    for (int i = 0; i < n; i++) {
 		byte line = readMem((short)(ir + i));
-		byte line = memory[ir + i];
-		if (!collided)
-		    collided = screen.drawSpriteLine(xcoord, ycoord + i, line);
+		if (screen.drawSpriteLine(xcoord, ycoord + i, line))
+		    collided = true;
 	    }
 	    registers[0xf] = (byte)(collided ? 1 : 0);
 	    break;
