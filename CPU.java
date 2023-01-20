@@ -12,6 +12,7 @@ public class CPU implements ActionListener {
     private int sp;
 
     private boolean isDebug = false;
+    private final int MEM_MAX = 4096;
 
     private MachineScreen screen;
     private KeyPad keypad;
@@ -53,12 +54,23 @@ public class CPU implements ActionListener {
     }
     
     public void writeMem(short address, byte data) {
-	//check for errors
+	if (address >= MEM_MAX || address < 0) {
+	    System.out.println("<ERROR> out of bounds write at " + address);
+	    System.exit(-1);
+	}
 	memory[address] = data;
+    }
+
+    public byte readMem(short address) {
+	if (address >= MEM_MAX || address < 0) {
+	    System.out.println("<ERROR> out of bounds read at " + address);
+	    System.exit(-1);
+	}
+	return (byte)(memory[address] & 0xff);
     }
     
     public void step() {
-	short opcode = (short)((memory[pc] << 8) | (memory[pc + 1] & 0xff));
+	short opcode = (short)((readMem(pc) << 8) | (readMem((short)(pc + 1)) & 0xff));
 	byte op = (byte)((opcode & 0xf000) >>> 12);
 	byte x = (byte)((opcode & 0x0f00) >>> 8);
 	byte y = (byte)((opcode & 0x00f0) >>> 4);
@@ -171,6 +183,7 @@ public class CPU implements ActionListener {
 	    boolean collided = false;
 	    
 	    for (int i = 0; i < n; i++) {
+		byte line = readMem((short)(ir + i));
 		byte line = memory[ir + i];
 		if (!collided)
 		    collided = screen.drawSpriteLine(xcoord, ycoord + i, line);
@@ -241,7 +254,7 @@ public class CPU implements ActionListener {
 	    case 0x65:
 		//todo: configurable old behavior
 		for (int i = 0; i <= x; i++) {
-		    registers[i] = memory[ir + i];
+		    registers[i] = readMem((short)(ir + i));
 		}
 		break;
 	    default:
