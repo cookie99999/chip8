@@ -32,6 +32,21 @@ public class CPU implements ActionListener {
 	this.screen = null;
     }
 
+    public void reset() {
+	this.pc = 0x200;
+	this.ir = 0;
+	this.delay_timer = 0;
+	this.sound_timer = 0;
+	this.sp = 0;
+	for (byte b : registers)
+	    b = 0;
+	//for (byte b : memory)
+	//b = 0;
+	for (short s : stack)
+	    s = 0;
+	screen.clear();
+    }
+    
     public void actionPerformed(ActionEvent e) {
 	delay_timer -= (delay_timer > 0) ? 1 : 0;
 	sound_timer -= (sound_timer > 0) ? 1 : 0;

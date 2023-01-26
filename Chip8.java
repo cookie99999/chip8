@@ -2,10 +2,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import javax.swing.*;
+import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 
 public class Chip8 {
+    private static CPU cpu;
+    private volatile static ProgramState state;
+
+    public enum ProgramState {
+	RUNNING, RESET, HALT
+    }
+    
     private static void createAndShowUI(MachineScreen screen, KeyPad kp) {
 	JFrame frame = new JFrame("Chip8");
 	DisplayPanel dp = new DisplayPanel(screen);
@@ -46,6 +54,9 @@ public class Chip8 {
 	exitItem.addActionListener(listen);
 	resetItem.addActionListener(listen);
 	prefItem.addActionListener(listen);
+
+	fileMenu.addMenuListener(listen);
+	machineMenu.addMenuListener(listen);
 	
 	frame.setJMenuBar(mb);
 	frame.pack();
@@ -86,7 +97,7 @@ public class Chip8 {
 	    System.exit(-1);
 	}
 	
-	CPU cpu = new CPU();
+	cpu = new CPU();
 	MachineScreen screen = new MachineScreen(64, 32, 4); //todo: user settable scale
 	KeyPad kp = new KeyPad();
 	cpu.setKeyPad(kp);
@@ -121,21 +132,53 @@ public class Chip8 {
 
 	Timer t = new Timer(1000/60, cpu);
 	t.start();
+
+	state = ProgramState.RUNNING;
+	
 	while (true) {
-	    cpu.step();
+	    switch (state) {
+	    case RUNNING:
+		cpu.step();
+		break;
+	    case HALT:
+		break;
+	    case RESET:
+		cpu.reset();
+		state = ProgramState.RUNNING;
+		break;
+	    default:
+		System.out.println("Unimplemented program state");
+		System.exit(-1);
+		break;
+	    }
 	}
     }
 
-    public static class GuiListener implements ActionListener {
+    public static class GuiListener implements ActionListener, MenuListener {
 	public void actionPerformed(ActionEvent e) {
 	    switch (e.getActionCommand()) {
 	    case "Exit":
 		System.exit(0);
 		break;
+	    case "Reset":
+		state = ProgramState.RESET;
+		break;
 	    default:
 		System.out.println("Unimplemented menu item");
 		break;
 	    }
+	}
+
+	public void menuSelected(MenuEvent e) {
+	    state = ProgramState.HALT;
+	}
+
+	public void menuDeselected(MenuEvent e) {
+	    state = ProgramState.RUNNING;
+	}
+
+	public void menuCanceled(MenuEvent e) {
+	    state = ProgramState.RUNNING;
 	}
     }
 }
