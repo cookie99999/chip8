@@ -194,7 +194,7 @@ public class CPU implements ActionListener {
 	case 0xc:
 	    registers[x] = (byte)((byte)(Math.random() * 256) & nn);
 	    break;
-	case 0xd:
+	case 0xd: //correct clipping off behavior as of 6125792
 	    int xcoord = registers[x];
 	    int ycoord = registers[y];
 	    boolean collided = false;

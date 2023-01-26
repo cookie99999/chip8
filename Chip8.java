@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Chip8 {
+public class Chip8 implements ActionListener {
     private static void createAndShowUI(MachineScreen screen, KeyPad kp) {
 	JFrame frame = new JFrame("Chip8");
 	DisplayPanel dp = new DisplayPanel(screen);
@@ -13,6 +13,18 @@ public class Chip8 {
 	frame.setLayout(new BorderLayout());
 	frame.add(dp);
 	frame.addKeyListener(kp);
+
+	JMenuBar mb = new JMenuBar();
+	JMenu fileMenu = new JMenu("File");
+	fileMenu.setMnemonic(KeyEvent.VK_F);
+	fileMenu.getAccessibleContext().setAccessibleDescription("File menu");
+	mb.add(fileMenu);
+
+	JMenuItem exitItem = new JMenuItem("Exit", KeyEvent.VK_X);
+	exitItem.getAccessibleContext().setAccessibleDescription("Exit the program");
+	fileMenu.add(exitItem);
+
+	frame.setJMenuBar(mb);
 	frame.pack();
 	frame.setLocationRelativeTo(null);
 	frame.setVisible(true);
@@ -89,5 +101,9 @@ public class Chip8 {
 	while (true) {
 	    cpu.step();
 	}
+    }
+
+    public void actionPerformed(ActionEvent e) {
+	
     }
 }
