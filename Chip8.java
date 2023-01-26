@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Chip8 implements ActionListener {
+public class Chip8 {
     private static void createAndShowUI(MachineScreen screen, KeyPad kp) {
 	JFrame frame = new JFrame("Chip8");
 	DisplayPanel dp = new DisplayPanel(screen);
@@ -20,10 +20,33 @@ public class Chip8 implements ActionListener {
 	fileMenu.getAccessibleContext().setAccessibleDescription("File menu");
 	mb.add(fileMenu);
 
+	JMenuItem loadItem = new JMenuItem("Load...", KeyEvent.VK_L);
+	loadItem.getAccessibleContext().setAccessibleDescription("Load a program file");
+	fileMenu.add(loadItem);
+	
 	JMenuItem exitItem = new JMenuItem("Exit", KeyEvent.VK_X);
 	exitItem.getAccessibleContext().setAccessibleDescription("Exit the program");
 	fileMenu.add(exitItem);
 
+	JMenu machineMenu = new JMenu("Machine");
+	machineMenu.setMnemonic(KeyEvent.VK_M);
+	machineMenu.getAccessibleContext().setAccessibleDescription("Machine menu");
+	mb.add(machineMenu);
+
+	JMenuItem resetItem = new JMenuItem("Reset", KeyEvent.VK_R);
+	resetItem.getAccessibleContext().setAccessibleDescription("Reset the machine");
+	machineMenu.add(resetItem);
+
+	JMenuItem prefItem = new JMenuItem("Preferences...", KeyEvent.VK_P);
+	prefItem.getAccessibleContext().setAccessibleDescription("Machine preferences");
+	machineMenu.add(prefItem);
+
+	GuiListener listen = new GuiListener();
+	loadItem.addActionListener(listen);
+	exitItem.addActionListener(listen);
+	resetItem.addActionListener(listen);
+	prefItem.addActionListener(listen);
+	
 	frame.setJMenuBar(mb);
 	frame.pack();
 	frame.setLocationRelativeTo(null);
@@ -103,7 +126,16 @@ public class Chip8 implements ActionListener {
 	}
     }
 
-    public void actionPerformed(ActionEvent e) {
-	
+    public static class GuiListener implements ActionListener {
+	public void actionPerformed(ActionEvent e) {
+	    switch (e.getActionCommand()) {
+	    case "Exit":
+		System.exit(0);
+		break;
+	    default:
+		System.out.println("Unimplemented menu item");
+		break;
+	    }
+	}
     }
 }
