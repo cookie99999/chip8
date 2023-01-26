@@ -9,6 +9,7 @@ import java.awt.event.*;
 public class Chip8 {
     private static CPU cpu;
     private volatile static ProgramState state;
+    private static final JFileChooser fc = new JFileChooser();
 
     public enum ProgramState {
 	RUNNING, RESET, HALT
@@ -65,7 +66,7 @@ public class Chip8 {
 	dp.startDisplay();
     }
     
-    public static byte[] loadBin(String path) {
+    public static void loadBin(String path, short start) {
 	Path p = Paths.get(path);
 	byte[] data = null;
 	try {
@@ -75,43 +76,37 @@ public class Chip8 {
 	    System.out.println(e);
 	    System.exit(-1);
 	}
-	return data;
+
+	int len = data.length;
+	if (len > 4096 - start) { //todo: show error dialogue instead or something
+	    System.out.println("<ERROR> data too large for emulated memory");
+	    System.exit(-1);
+	}
+
+	for (int i = 0; i < len; i++)
+	    cpu.writeMem((short)(start + i), data[i]);
     }
     
     public static void main(String[] args) {
-	byte[] bin = null;
+	cpu = new CPU();
+	MachineScreen screen = new MachineScreen(64, 32, 4); //todo: user settable scale
+	KeyPad kp = new KeyPad();
+	cpu.setKeyPad(kp);
+	cpu.setScreen(screen);
+
 	try {
-	    bin = loadBin(args[0]); //todo: check it's a valid path
+	    loadBin(args[0], (short)0x200); //todo: check it's a valid path
 	} catch (ArrayIndexOutOfBoundsException e) {
 	    System.out.println("Usage: java Chip8 <bin file path>");
 	    System.out.println(e);
 	    System.exit(0);
 	}
 
-	byte[] font = null;
 	try {
-	    font = loadBin("font.bin"); //todo: configurable font
+	    loadBin("font.bin", (short)0x50); //todo: configurable font
 	} catch (Exception e) {
 	    System.out.println("<ERROR> failed loading font");
 	    System.out.println(e);
-	    System.exit(-1);
-	}
-	
-	cpu = new CPU();
-	MachineScreen screen = new MachineScreen(64, 32, 4); //todo: user settable scale
-	KeyPad kp = new KeyPad();
-	cpu.setKeyPad(kp);
-	cpu.setScreen(screen);
-	
-	int binLen = bin.length;
-	if (binLen > 4096 - 0x200) {
-	    System.out.println("<ERROR> input file too large");
-	    System.exit(-1);
-	}
-
-	int fontLen = font.length;
-	if (fontLen != 5 * 16) {
-	    System.out.println("<ERROR> font file size incorrect: " + fontLen);
 	    System.exit(-1);
 	}
 
@@ -121,14 +116,6 @@ public class Chip8 {
 		    createAndShowUI(screen, kp);
 		}
 	    });
-	
-	for (short i = 0; i < binLen; i++) {
-	    cpu.writeMem((short)(0x200 + i), bin[i]);
-	}
-
-	for (short i = 0; i < fontLen; i++) {
-	    cpu.writeMem((short)(0x50 + i), font[i]);
-	}
 
 	Timer t = new Timer(1000/60, cpu);
 	t.start();
@@ -157,6 +144,13 @@ public class Chip8 {
     public static class GuiListener implements ActionListener, MenuListener {
 	public void actionPerformed(ActionEvent e) {
 	    switch (e.getActionCommand()) {
+	    case "Load...":
+		int ret = fc.showOpenDialog(null);
+		if (ret == JFileChooser.APPROVE_OPTION) {
+		    loadBin(fc.getSelectedFile().getAbsolutePath(), (short)0x200);
+		    state = ProgramState.RESET;
+		}
+		break;
 	    case "Exit":
 		System.exit(0);
 		break;
