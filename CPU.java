@@ -16,6 +16,11 @@ public class CPU implements ActionListener {
 
     private MachineScreen screen;
     private KeyPad keypad;
+
+    public enum CompatLevel {
+	CHIP_8, CHIP_48, SCHIP_1_0, SCHIP_1_1, XOCHIP
+    }
+    private CompatLevel compat;
     
     public CPU() {
 	this.pc = 0x200;
@@ -58,6 +63,10 @@ public class CPU implements ActionListener {
 
     public void setKeyPad(KeyPad p) {
 	this.keypad = p;
+    }
+
+    public void setCompatLevel(CompatLevel cl) {
+	this.compat = cl;
     }
 
     private void debugPrint(short opcode) {
@@ -146,12 +155,18 @@ public class CPU implements ActionListener {
 		break;
 	    case 0x1:
 		registers[x] |= registers[y];
+		if (compat == CompatLevel.CHIP_8)
+		    registers[0xf] = 0;
 		break;
 	    case 0x2:
 		registers[x] &= registers[y];
+		if (compat == CompatLevel.CHIP_8)
+		    registers[0xf] = 0;
 		break;
 	    case 0x3:
 		registers[x] ^= registers[y];
+		if (compat == CompatLevel.CHIP_8)
+		    registers[0xf] = 0;
 		break;
 	    case 0x4:
 		byte tmp = registers[x];
@@ -170,7 +185,9 @@ public class CPU implements ActionListener {
 		    registers[0xf] = 0;
 		break;
 	    case 0x6:
-		//todo: configurable for old behavior
+	        if (compat != CompatLevel.CHIP_48 && compat != CompatLevel.SCHIP_1_0 &&
+		    compat != CompatLevel.SCHIP_1_1)
+		    registers[x] = registers[y];
 		tmp = (byte)(registers[x] & 1);
 		registers[x] = (byte)((registers[x] & 0xff) >>> 1);
 		registers[0xf] = tmp;
@@ -184,7 +201,9 @@ public class CPU implements ActionListener {
 		    registers[0xf] = 0;
 		break;
 	    case 0xe:
-		//todo: configurable for old behavior
+		if (compat != CompatLevel.CHIP_48 && compat != CompatLevel.SCHIP_1_0 &&
+		    compat != CompatLevel.SCHIP_1_1) 
+		    registers[x] = registers[y];
 		tmp = (byte)((registers[x] & 0x80) >>> 7);
 		registers[x] <<= 1;
 		registers[0xf] = tmp;
@@ -281,12 +300,16 @@ public class CPU implements ActionListener {
 		for (int i = 0; i <= x; i++) {
 		    writeMem((short)(ir + i), registers[i]);
 		}
+		if (compat == CompatLevel.CHIP_8)
+		    ir += x + 1;
 		break;
 	    case 0x65:
 		//todo: configurable old behavior
 		for (int i = 0; i <= x; i++) {
 		    registers[i] = readMem((short)(ir + i));
 		}
+		if (compat == CompatLevel.CHIP_8)
+		    ir += x + 1;
 		break;
 	    default:
 		System.out.println("<ERROR> unimplemented opcode " + String.format("%04x", opcode));

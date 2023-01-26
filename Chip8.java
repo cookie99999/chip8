@@ -93,6 +93,7 @@ public class Chip8 {
 	KeyPad kp = new KeyPad();
 	cpu.setKeyPad(kp);
 	cpu.setScreen(screen);
+	cpu.setCompatLevel(CPU.CompatLevel.CHIP_48);
 
 	try {
 	    loadBin(args[0], (short)0x200); //todo: check it's a valid path
