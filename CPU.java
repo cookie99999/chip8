@@ -222,8 +222,10 @@ public class CPU implements ActionListener {
 	    ir = nnn;
 	    break;
 	case 0xb:
-	    //todo: configurable chip-48 behavior
-	    pc = (short)(nnn + registers[0]); //todo: check bounds
+	    if (compat == CompatLevel.CHIP_8)
+		pc = (short)(nnn + (registers[0] & 0xff)); //todo: check bounds
+	    else
+		pc = (short)(nnn + (registers[x] & 0xff));
 	    break;
 	case 0xc:
 	    registers[x] = (byte)((byte)(Math.random() * 256) & nn);
