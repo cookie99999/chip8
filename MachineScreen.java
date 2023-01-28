@@ -25,15 +25,11 @@ public class MachineScreen {
     }
 
     public void setPixel(int x, int y, int color) {
-	//todo: bound checking
-
-	pixels[(y & 31) * xmax + (x & 63)] = color;
+	pixels[(y % ymax) * xmax + (x % xmax)] = color;
     }
 
     public int getPixel(int x, int y) {
-	//todo: bound checking
-
-	return pixels[(y & 31) * xmax + (x & 63)];
+	return pixels[(y % ymax) * xmax + (x % xmax)];
     }
 
     public void clear() {
@@ -42,18 +38,6 @@ public class MachineScreen {
 		setPixel(x, y, 0);
 	    }
 	}
-    }
-
-    public boolean drawSpriteLine(int x, int y, byte line) {
-	boolean collided = false;
-	for (int i = 7; i >= 0; i--) {
-	    int tmp = getPixel(x + (7 - i), y);
-	    setPixel(x + (7 - i), y, ((line >>> i) & 1) ^ tmp);
-	    if (tmp == 1 && getPixel(x + (7 - i), y) == 0) { //pixel turned off
-		collided = true;
-	    }
-	}
-	return collided;
     }
 
     public void draw(Graphics g) {

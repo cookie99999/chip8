@@ -115,6 +115,9 @@ public class CPU implements ActionListener {
 		if (--sp < 0)
 		    sp = 0;
 		pc = stack[sp];
+	    } else {
+		System.out.println(String.format("<ERROR> unimplemented opcode %04x", opcode));
+		System.exit(-1);
 	    }
 	    break;
 	case 0x1:
@@ -230,15 +233,29 @@ public class CPU implements ActionListener {
 	case 0xc:
 	    registers[x] = (byte)((byte)(Math.random() * 256) & nn);
 	    break;
-	case 0xd: //correct clipping off behavior as of 6125792
-	    int xcoord = registers[x];
-	    int ycoord = registers[y];
+	case 0xd:
+	    int spx = registers[x];
+	    int spy = registers[y];
 	    boolean collided = false;
+
+	    spx %= 64;
+	    spy %= 32;
 	    
 	    for (int i = 0; i < n; i++) {
 		byte line = readMem((short)(ir + i));
-		if (screen.drawSpriteLine(xcoord, ycoord + i, line))
-		    collided = true;
+		if (spy < 32 || compat == CompatLevel.XOCHIP) {
+		    for (int j = 7; j >= 0; j--) {
+			int pix_x = spx + (7 - j);
+			int tmp = screen.getPixel(pix_x, spy);
+			if (pix_x < 64 || compat == CompatLevel.XOCHIP) {
+			    screen.setPixel(pix_x, spy, ((line >>> j) & 1) ^ tmp);
+			    if (tmp == 1 && screen.getPixel(pix_x, spy) == 0) { //pixel turned off
+				collided = true;
+			    }
+			}
+		    }
+		}
+		spy++;
 	    }
 	    registers[0xf] = (byte)(collided ? 1 : 0);
 	    break;
