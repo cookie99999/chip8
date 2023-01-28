@@ -11,7 +11,7 @@ java Chip8 <bin file path>
 This interpreter uses no libraries outside of the standard JDK. It can be built by `javac Chip8.java`. It has only been tested on Java 17 and 19, however it should work on any version of Java 8 or higher.
 
 ## Todo
-- Fix clipping/wrapping implementation
 - Add sound support
 - Implement configurable cycles per second speed and compatibility levels
 - Add GUI for configuration and file loading
+- Add support for extended Super CHIP and XOCHIP instructions
