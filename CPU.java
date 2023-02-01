@@ -35,6 +35,7 @@ public class CPU implements ActionListener {
 	for (short s : stack)
 	    s = 0;
 	this.screen = null;
+	this.compat = CompatLevel.CHIP_48;
     }
 
     public void reset() {

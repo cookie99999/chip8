@@ -110,7 +110,7 @@ public class Chip8 {
 	    System.out.println(e);
 	    System.exit(-1);
 	}
-
+	
 	EventQueue.invokeLater(new Runnable()
 	    {
 		public void run() {
@@ -158,6 +158,13 @@ public class Chip8 {
 	    case "Reset":
 		state = ProgramState.RESET;
 		break;
+	    case "Preferences...":
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+			   OptionsFrame of = new OptionsFrame();
+			}
+		    });
+		break;
 	    default:
 		System.out.println("Unimplemented menu item");
 		break;
@@ -174,6 +181,37 @@ public class Chip8 {
 
 	public void menuCanceled(MenuEvent e) {
 	    state = ProgramState.RUNNING;
+	}
+    }
+
+    public static class OptionsFrame extends JFrame implements ActionListener {
+	/* needs:
+	   compatlevel
+	   scale (might need screen refactor)
+	   cycles per second
+	   sound toggle/volume
+	   ok/apply/cancel
+	*/
+
+	public OptionsFrame() {
+	    super("Machine Preferences");
+	    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+	    JLabel compatLabel = new JLabel("Compatibility level:");
+	    String[] compatStrings = { "CHIP-8", "CHIP-48", "Super-CHIP", "XOCHIP" };
+	    JComboBox<String> compatList = new JComboBox<>(compatStrings);
+	    compatList.setSelectedIndex(1);
+	    compatList.addActionListener(this);
+
+	    //todo: layout
+	    add(compatLabel);
+	    add(compatList);
+	    pack();
+	    setVisible(true);
+	}
+
+	public void actionPerformed(ActionEvent e) {
+
 	}
     }
 }
