@@ -3,6 +3,8 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.text.*;
+import java.text.NumberFormat;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -197,26 +199,78 @@ public class Chip8 {
 	   sound toggle/volume
 	   ok/apply/cancel
 	*/
+	private JComboBox<String> compatList;
+	private JFormattedTextField cyclesField;
 
 	public OptionsFrame() {
 	    super("Machine Preferences");
 	    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 	    JLabel compatLabel = new JLabel("Compatibility level:");
-	    String[] compatStrings = { "CHIP-8", "CHIP-48", "Super-CHIP", "XOCHIP" };
-	    JComboBox<String> compatList = new JComboBox<>(compatStrings);
-	    compatList.setSelectedIndex(1);
+	    String[] compatStrings = { "CHIP-8", "CHIP-48", "Super-CHIP 1.0", "Super-CHIP 1.1", "XOCHIP" };
+	    compatList = new JComboBox<>(compatStrings);
+	    compatList.setSelectedIndex(cpu.getCompatLevel().ordinal());
 	    compatList.addActionListener(this);
+
+	    JLabel cyclesLabel = new JLabel("Cycles per second:");
+	    NumberFormat fmt = NumberFormat.getInstance();
+	    NumberFormatter fmtr = new NumberFormatter(fmt);
+	    fmtr.setValueClass(Integer.class);
+	    fmtr.setMinimum(1);
+	    fmtr.setMaximum(Integer.MAX_VALUE);
+	    fmtr.setAllowsInvalid(false);
+	    cyclesField = new JFormattedTextField(fmtr);
+	    cyclesField.setValue(cycles);
+
+	    JButton okbtn = new JButton("Ok");
+	    okbtn.setMnemonic(KeyEvent.VK_O);
+	    okbtn.setActionCommand("ok");
+	    okbtn.addActionListener(this);
+
+	    JButton cancelbtn = new JButton("Cancel");
+	    cancelbtn.setMnemonic(KeyEvent.VK_C);
+	    cancelbtn.setActionCommand("cancel");
+	    cancelbtn.addActionListener(this);
 
 	    //todo: layout
 	    add(compatLabel);
 	    add(compatList);
+	    add(cyclesField);
+	    add(okbtn);
+	    add(cancelbtn);
 	    pack();
 	    setVisible(true);
 	}
 
 	public void actionPerformed(ActionEvent e) {
-
+	    switch (e.getActionCommand()) {
+	    case "ok":
+		cycles = (int)cyclesField.getValue();
+		switch ((String)compatList.getSelectedItem()) {
+		case "CHIP-8":
+		    cpu.setCompatLevel(CPU.CompatLevel.CHIP_8);
+		    break;
+		case "CHIP-48":
+		    cpu.setCompatLevel(CPU.CompatLevel.CHIP_48);
+		    break;
+		case "Super-CHIP 1.0":
+		    cpu.setCompatLevel(CPU.CompatLevel.SCHIP_1_0);
+		    break;
+		case "Super-CHIP 1.1":
+		    cpu.setCompatLevel(CPU.CompatLevel.SCHIP_1_1);
+		    break;
+		case "XOCHIP":
+		    cpu.setCompatLevel(CPU.CompatLevel.XOCHIP);
+		    break;
+		}
+		dispose();
+		break;
+	    case "cancel":
+		dispose();
+		break;
+	    default:
+		break;
+	    }
 	}
     }
 }

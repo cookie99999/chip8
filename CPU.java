@@ -70,6 +70,10 @@ public class CPU implements ActionListener {
 	this.compat = cl;
     }
 
+    public CompatLevel getCompatLevel() {
+	return compat;
+    }
+
     private void debugPrint(short opcode) {
 	System.out.println(String.format("%04x\npc: %04x ir: %04x delay: %02x sound: %02x",
 					 opcode, pc, ir, delay_timer, sound_timer));
