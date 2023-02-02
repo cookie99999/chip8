@@ -10,6 +10,7 @@ public class Chip8 {
     private static CPU cpu;
     private volatile static ProgramState state;
     private static final JFileChooser fc = new JFileChooser();
+    private static int cycles = 700;
 
     public enum ProgramState {
 	RUNNING, RESET, HALT
@@ -122,8 +123,9 @@ public class Chip8 {
 	t.start();
 
 	state = ProgramState.RUNNING;
-	
-	while (true) {
+
+	long start = System.nanoTime();
+	for (long i = 0; ; i++) {
 	    switch (state) {
 	    case RUNNING:
 		cpu.step();
@@ -139,6 +141,9 @@ public class Chip8 {
 		System.exit(-1);
 		break;
 	    }
+	    long end = start + i * 1000000000L / cycles;
+	    while (System.nanoTime() < end)
+		;
 	}
     }
 
