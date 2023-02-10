@@ -12,6 +12,4 @@ This interpreter uses no libraries outside of the standard JDK. It can be built 
 
 ## Todo
 - Add sound support
-- Implement configurable cycles per second speed and compatibility levels
-- Add GUI for configuration and file loading
 - Add support for extended Super CHIP and XOCHIP instructions
