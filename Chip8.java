@@ -12,7 +12,7 @@ public class Chip8 {
     private static CPU cpu;
     private volatile static ProgramState state;
     private static final JFileChooser fc = new JFileChooser();
-    private static int cycles = 700;
+    private volatile static int cycles = 700;
 
     public enum ProgramState {
 	RUNNING, RESET, HALT
@@ -101,9 +101,7 @@ public class Chip8 {
 	try {
 	    loadBin(args[0], (short)0x200); //todo: check it's a valid path
 	} catch (ArrayIndexOutOfBoundsException e) {
-	    System.out.println("Usage: java Chip8 <bin file path>");
-	    System.out.println(e);
-	    System.exit(0);
+	    //can load from gui if no command line arguments present
 	}
 
 	try {
@@ -113,7 +111,7 @@ public class Chip8 {
 	    System.out.println(e);
 	    System.exit(-1);
 	}
-	
+
 	EventQueue.invokeLater(new Runnable()
 	    {
 		public void run() {
@@ -205,6 +203,7 @@ public class Chip8 {
 	public OptionsFrame() {
 	    super("Machine Preferences");
 	    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+	    setResizable(false);
 	    this.getContentPane().setLayout(new GridBagLayout());
 
 	    JLabel compatLabel = new JLabel("Compatibility level:");

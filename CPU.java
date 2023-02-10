@@ -111,6 +111,7 @@ public class CPU implements ActionListener {
 	    debugPrint(opcode);
 
 	pc += 2; //increment before execution so jmp won't be messed up
+	pc %= MEM_MAX;
 	
 	switch (op) {
 	case 0x0:
@@ -122,7 +123,6 @@ public class CPU implements ActionListener {
 		pc = stack[sp];
 	    } else {
 		System.out.println(String.format("<ERROR> unimplemented opcode %04x", opcode));
-		System.exit(-1);
 	    }
 	    break;
 	case 0x1:
@@ -218,7 +218,6 @@ public class CPU implements ActionListener {
 		break;
 	    default:
 		System.out.println(String.format("<ERROR> unimplented opcode %04x", opcode));
-		System.exit(-1);
 		break;
 	    }
 	    break;
@@ -337,13 +336,11 @@ public class CPU implements ActionListener {
 		break;
 	    default:
 		System.out.println("<ERROR> unimplemented opcode " + String.format("%04x", opcode));
-	    System.exit(-1);
 	    break;
 	    }
 	    break;
 	default:
 	    System.out.println("<ERROR> unimplemented opcode " + String.format("%04x", opcode));
-	    System.exit(-1);
 	    break;
 	}
     }
