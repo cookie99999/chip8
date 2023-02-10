@@ -205,6 +205,7 @@ public class Chip8 {
 	public OptionsFrame() {
 	    super("Machine Preferences");
 	    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+	    this.getContentPane().setLayout(new GridBagLayout());
 
 	    JLabel compatLabel = new JLabel("Compatibility level:");
 	    String[] compatStrings = { "CHIP-8", "CHIP-48", "Super-CHIP 1.0", "Super-CHIP 1.1", "XOCHIP" };
@@ -232,12 +233,41 @@ public class Chip8 {
 	    cancelbtn.setActionCommand("cancel");
 	    cancelbtn.addActionListener(this);
 
-	    //todo: layout
-	    add(compatLabel);
-	    add(compatList);
-	    add(cyclesField);
-	    add(okbtn);
-	    add(cancelbtn);
+	    GridBagConstraints con = new GridBagConstraints();
+	    con.gridx = 0;
+	    con.gridy = 0;
+	    con.gridwidth = 2;
+	    con.anchor = GridBagConstraints.LINE_START;
+	    add(compatLabel, con);
+	    
+	    con.gridx = 4;
+	    con.fill = GridBagConstraints.HORIZONTAL;
+	    con.anchor = GridBagConstraints.LINE_END;
+	    add(compatList, con);
+	    
+	    con.gridx = 0;
+	    con.gridy = 1;
+	    con.gridwidth = 1;
+	    con.fill = GridBagConstraints.NONE;
+	    con.anchor = GridBagConstraints.LINE_START;
+	    add(cyclesLabel, con);
+	    
+	    con.gridx = 4;
+	    con.gridwidth = 2;
+	    con.fill = GridBagConstraints.HORIZONTAL;
+	    con.anchor = GridBagConstraints.LINE_END;
+	    add(cyclesField, con);
+	    
+	    con.gridx = 1;
+	    con.gridy = 2;
+	    con.gridwidth = 1;
+	    con.fill = GridBagConstraints.NONE;
+	    con.anchor = GridBagConstraints.CENTER;
+	    add(okbtn, con);
+
+	    con.gridx = 2;
+	    add(cancelbtn, con);
+	    
 	    pack();
 	    setVisible(true);
 	}
