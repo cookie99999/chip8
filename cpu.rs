@@ -1,3 +1,5 @@
+use crate::screen;
+
 #[derive(Debug, PartialEq)]
 enum CompatLevel {
     Chip8,
@@ -8,8 +10,9 @@ enum CompatLevel {
 }
 
 #[derive(Debug)]
-pub struct CPU {
+pub struct CPU<'a> {
     memory: [u8; 4096],
+    pub screen: &'a mut screen::Screen,
     pc: u16,
     ir: u16,
     delay_timer: u8,
@@ -21,10 +24,11 @@ pub struct CPU {
     debug: bool,
 }
 
-impl CPU {
-    pub fn new() -> Self {
+impl<'a> CPU<'a> {
+    pub fn new(screen: &'a mut screen::Screen) -> Self {
 	CPU {
 	    memory: [0; 4096],
+	    screen: screen,
 	    pc: 0x200,
 	    ir: 0,
 	    delay_timer: 0,
@@ -107,7 +111,7 @@ impl CPU {
 		},
 	    0x1 => {
 		if (self.pc - 2) == nnn && self.debug {
-		    panic!("Infinite loop entered, quitting...");
+		    //panic!("Infinite loop entered, quitting...");
 		}
 		self.pc = nnn;
 	    },
@@ -133,7 +137,8 @@ impl CPU {
 			    let tmp = 0; //will be the previous pixel value when done
 			    if pix_x < 64 || self.compat == CompatLevel::XOChip {
 				//todo: actually set pixel graphically
-				println!("Pixel at {}, {} ^ w/ {}", pix_x, spy, (line >> j) & 1);
+				self.screen.set_pixel(pix_x, spy,
+						      ((line >> j) & 1) ^ tmp);
 				//next check for collision
 			    }
 			}
