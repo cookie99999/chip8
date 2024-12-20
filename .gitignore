@@ -5,3 +5,8 @@
 *.ch8
 *.bin
 *.bak
+
+
+# Added by cargo
+
+/target

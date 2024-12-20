@@ -43,17 +43,19 @@ impl CPU {
 	self.delay_timer = 0;
 	self.sound_timer = 0;
 	self.sp = 0;
-	self.memory.fill(0);
 	self.registers.fill(0);
 	self.stack.fill(0);
     }
 
     pub fn dbg_print(&self, opcode: u16) {
-	println!("{:04X}: {:04X} IR: {:04X} SP: {:02X} delay: {:02X} sound: {:02X}",
-		 self.pc, opcode, self.ir, self.sp, self.delay_timer, self.sound_timer);
+	println!(
+	    "{:04X}: {:04X} IR: {:04X} SP: {:02X} delay: {:02X} sound: {:02X}",
+	    self.pc, opcode, self.ir, self.sp, self.delay_timer, self.sound_timer
+	);
 	for (i, r) in self.registers.iter().enumerate() {
-	    println!("V{:X}: {:02X} ", i, r);
+	    print!("{:X}:{:02X} ", i, r);
 	}
+	println!("\n");
     }
 
     pub fn write_mem(&mut self, addr: u16, data: u8) {
@@ -104,8 +106,17 @@ impl CPU {
 			println!("Unimplemented opcode {:04X}", opcode),
 		},
 	    0x1 => {
+		if (self.pc - 2) == nnn && self.debug {
+		    panic!("Infinite loop entered, quitting...");
+		}
 		self.pc = nnn;
 	    },
+	    0x6 =>
+		self.registers[x as usize] = nn,
+	    0x7 =>
+		self.registers[x as usize] = self.registers[x as usize].wrapping_add(nn),
+	    0xa =>
+		self.ir = nnn,
 	    _ =>
 		println!("Unimplemented opcode {:04X}", opcode),
 	}
