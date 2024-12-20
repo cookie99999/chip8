@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum CompatLevel {
     Chip8,
     Chip48,
@@ -117,6 +117,31 @@ impl CPU {
 		self.registers[x as usize] = self.registers[x as usize].wrapping_add(nn),
 	    0xa =>
 		self.ir = nnn,
+	    0xd => {
+		let mut spx = self.registers[x as usize];
+		let mut spy = self.registers[y as usize];
+		let mut collided: bool = false;
+
+		spx %= 64;
+		spy %= 32;
+		
+		for i in 0..n {
+		    let line: u8 = self.read_mem(self.ir + i as u16).unwrap();
+		    if spy < 32 || self.compat == CompatLevel::XOChip {
+			for j in (0..=7).rev() {
+			    let pix_x = spx + (7 - j);
+			    let tmp = 0; //will be the previous pixel value when done
+			    if pix_x < 64 || self.compat == CompatLevel::XOChip {
+				//todo: actually set pixel graphically
+				println!("Pixel at {}, {} ^ w/ {}", pix_x, spy, (line >> j) & 1);
+				//next check for collision
+			    }
+			}
+		    }
+		    spy += 1;
+		}
+		//set VF to whether or not a collision occurred
+	    },
 	    _ =>
 		println!("Unimplemented opcode {:04X}", opcode),
 	}
