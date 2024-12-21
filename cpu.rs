@@ -242,9 +242,7 @@ impl<'a> CPU<'a> {
 		    }
 		    spy += 1;
 		}
-		self.registers[0xf] = match collided {
-		    true => 1, false => 0,
-		}
+		self.registers[0xf] = collided as u8;
 	    },
 	    0xf => match nn {
 		0x07 =>
