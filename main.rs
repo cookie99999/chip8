@@ -2,6 +2,7 @@ extern crate sdl2;
 mod cpu;
 mod screen;
 
+use std::env;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::event::Event;
@@ -36,10 +37,11 @@ fn draw_screen(screen: &screen::Screen,
 }
 
 fn main() {
+    let path = env::args().nth(1).expect("Usage: main <binary path>");
     let mut screen = screen::Screen::new(64, 32, 10);
     let mut cpu = cpu::CPU::new(&mut screen);
     cpu.reset();
-    load_binary(&mut cpu, "3-corax+.ch8", 0x200);
+    load_binary(&mut cpu, &path, 0x200);
     
     let sdl_context = sdl2::init().unwrap();
     let video = sdl_context.video().unwrap();
@@ -64,6 +66,80 @@ fn main() {
 		Event::Quit {..} |
 		Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
 		    break 'running;
+		},
+		Event::KeyDown { keycode: Some(kc), .. } => {
+		    match kc {
+			Keycode::NUM_1 =>
+			    cpu.key_down(1),
+			Keycode::NUM_2 =>
+			    cpu.key_down(2),
+			Keycode::NUM_3 =>
+			    cpu.key_down(3),
+			Keycode::NUM_4 =>
+			    cpu.key_down(0xc),
+			Keycode::Q =>
+			    cpu.key_down(4),
+			Keycode::W =>
+			    cpu.key_down(5),
+			Keycode::E =>
+			    cpu.key_down(6),
+			Keycode::R =>
+			    cpu.key_down(0xd),
+			Keycode::A =>
+			    cpu.key_down(7),
+			Keycode::S =>
+			    cpu.key_down(8),
+			Keycode::D =>
+			    cpu.key_down(9),
+			Keycode::F =>
+			    cpu.key_down(0xe),
+			Keycode::Z =>
+			    cpu.key_down(0xa),
+			Keycode::X =>
+			    cpu.key_down(0),
+			Keycode::C =>
+			    cpu.key_down(0xb),
+			Keycode::V =>
+			    cpu.key_down(0xf),
+			_ => {},
+		    };
+		},
+		Event::KeyUp { keycode: Some(kc), .. } => {
+		    match kc {
+			Keycode::NUM_1 =>
+			    cpu.key_up(1),
+			Keycode::NUM_2 =>
+			    cpu.key_up(2),
+			Keycode::NUM_3 =>
+			    cpu.key_up(3),
+			Keycode::NUM_4 =>
+			    cpu.key_up(0xc),
+			Keycode::Q =>
+			    cpu.key_up(4),
+			Keycode::W =>
+			    cpu.key_up(5),
+			Keycode::E =>
+			    cpu.key_up(6),
+			Keycode::R =>
+			    cpu.key_up(0xd),
+			Keycode::A =>
+			    cpu.key_up(7),
+			Keycode::S =>
+			    cpu.key_up(8),
+			Keycode::D =>
+			    cpu.key_up(9),
+			Keycode::F =>
+			    cpu.key_up(0xe),
+			Keycode::Z =>
+			    cpu.key_up(0xa),
+			Keycode::X =>
+			    cpu.key_up(0),
+			Keycode::C =>
+			    cpu.key_up(0xb),
+			Keycode::V =>
+			    cpu.key_up(0xf),
+			_ => {},
+		    };
 		},
 		_ => {}
 	    }

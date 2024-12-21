@@ -14,6 +14,7 @@ enum CompatLevel {
 pub struct CPU<'a> {
     memory: [u8; 4096],
     pub screen: &'a mut screen::Screen,
+    keys: [u8; 16],
     pc: u16,
     ir: u16,
     delay_timer: u8,
@@ -30,6 +31,7 @@ impl<'a> CPU<'a> {
 	CPU {
 	    memory: [0; 4096],
 	    screen: screen,
+	    keys: [0; 16],
 	    pc: 0x200,
 	    ir: 0,
 	    delay_timer: 0,
@@ -52,10 +54,86 @@ impl<'a> CPU<'a> {
 	self.stack.fill(0);
     }
 
+    pub fn key_down(&mut self, key: u8) {
+	match key {
+	    0..16 =>
+		self.keys[key as usize] = 1,
+	    _ => {},
+	};
+    }
+
+    pub fn key_up(&mut self, key: u8) {
+	match key {
+	    0..16 =>
+		self.keys[key as usize] = 0,
+	    _ => {},
+	};
+    }
+
+    fn opcode_to_str(opcode: u16) -> String {
+	let op: u8 = ((opcode & 0xf000) >> 12) as u8;
+	let x: usize = ((opcode & 0x0f00) >> 8) as usize;
+	let y: usize = ((opcode & 0x00f0) >> 4) as usize;
+	let n: u8 = (opcode & 0x000f) as u8;
+	let nn: u8 = (opcode & 0x00ff) as u8;
+	let nnn: u16 = opcode & 0x0fff;
+
+	let result = match op {
+	    0x0 => match nn {
+		0xe0 => "CLS".to_string(),
+		0xee => "RET".to_string(),
+		_ => "UNK 0x0nnn".to_string(),
+	    },
+	    0x1 => format!("JP {nnn:04X}"),
+	    0x2 => format!("CALL {nnn:04X}"),
+	    0x3 => format!("SE V{x:X}, {nn:02X}"),
+	    0x4 => format!("SNE V{x:X}, {nn:02X}"),
+	    0x5 => format!("SE V{x:X}, V{y:X}"),
+	    0x6 => format!("LD V{x:X}, {nn:02X}"),
+	    0x7 => format!("ADD V{x:X}, {nn:02X}"),
+	    0x8 => match n {
+		0x0 => format!("LD V{x:X}, V{y:X}"),
+		0x1 => format!("OR V{x:X}, V{y:X}"),
+		0x2 => format!("AND V{x:X}, V{y:X}"),
+		0x3 => format!("XOR V{x:X}, V{y:X}"),
+		0x4 => format!("ADD V{x:X}, V{y:X}"),
+		0x5 => format!("SUB V{x:X}, V{y:X}"),
+		0x6 => format!("SHR V{x:X} {{, V{y:X}}}"),
+		0x7 => format!("SUBN V{x:X}, V{y:X}"),
+		0xe => format!("SHL V{x:X} {{, V{y:X}}}"),
+		_ => "UNK 0x8xyn".to_string(),
+	    },
+	    0x9 => format!("SNE V{x:X}, V{y:X}"),
+	    0xa => format!("LD I, {nnn:04X}"),
+	    0xb => format!("JP V0, {nnn:04X}"),
+	    0xc => format!("RND V{x:X}, {nn:02X}"),
+	    0xd => format!("DRW V{x:X}, V{y:X}, {n:X}"),
+	    0xe => match nn {
+		0x9e => format!("SKP V{x:X}"),
+		0xa1 => format!("SKNP V{x:X}"),
+		_ => "UNK 0xexnn".to_string(),
+	    },
+	    0xf => match nn {
+		0x07 => format!("LD V{x:X}, DT"),
+		0x0a => format!("LD V{x:X}, K"),
+		0x15 => format!("LD DT, V{x:X}"),
+		0x18 => format!("LD ST, V{x:X}"),
+		0x1e => format!("ADD I, V{x:X}"),
+		0x29 => format!("LD IR, FN + V{x:X}"),
+		0x33 => format!("LD (IR), V{x:X}.BCD"),
+		0x55 => format!("LD (IR), V{x:X}"),
+		0x65 => format!("LD V{x:X}, (IR)"),
+		_ => "UNK 0xfxnn".to_string(),
+	    },
+	    _ => "UNK".to_string(),
+	};
+	result
+    }
+    
     pub fn dbg_print(&self, opcode: u16) {
 	println!(
-	    "{:04X}: {:04X} IR: {:04X} SP: {:02X} delay: {:02X} sound: {:02X}",
-	    self.pc, opcode, self.ir, self.sp, self.delay_timer, self.sound_timer
+	    "{:04X}: {} IR: {:04X} SP: {:02X} delay: {:02X} sound: {:02X}",
+	    self.pc, Self::opcode_to_str(opcode), self.ir, self.sp, self.delay_timer, self.sound_timer
 	);
 	for (i, r) in self.registers.iter().enumerate() {
 	    print!("{:X}:{:02X} ", i, r);
@@ -244,9 +322,32 @@ impl<'a> CPU<'a> {
 		}
 		self.registers[0xf] = collided as u8;
 	    },
+	    0xe => match nn {
+		0x9e =>
+		    self.pc = match self.keys[self.registers[x] as usize] {
+			1 => self.pc + 2,
+			_ => self.pc,
+		    },
+		0xa1 =>
+		    self.pc = match self.keys[self.registers[x] as usize] {
+			0 => self.pc + 2,
+			_ => self.pc,
+		    },
+		_ => println!("Unimplemented sub opcode in op 0xe"),
+	    },
 	    0xf => match nn {
 		0x07 =>
 		    self.registers[x] = self.delay_timer,
+		0x0a => {
+		    self.pc -= 2;
+		    for i in 0..16 {
+			if self.keys[i as usize] == 1 {
+			    self.registers[x] = i as u8;
+			    self.pc += 2;
+			    break;
+			}
+		    }
+		},
 		0x15 =>
 		    self.delay_timer = self.registers[x],
 		0x18 =>
