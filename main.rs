@@ -39,7 +39,7 @@ fn main() {
     let mut screen = screen::Screen::new(64, 32, 10);
     let mut cpu = cpu::CPU::new(&mut screen);
     cpu.reset();
-    load_binary(&mut cpu, "2-ibm-logo.ch8", 0x200);
+    load_binary(&mut cpu, "3-corax+.ch8", 0x200);
     
     let sdl_context = sdl2::init().unwrap();
     let video = sdl_context.video().unwrap();
