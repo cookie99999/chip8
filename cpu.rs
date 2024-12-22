@@ -54,6 +54,11 @@ impl<'a> CPU<'a> {
 	self.stack.fill(0);
     }
 
+    pub fn tick_timers(&mut self) {
+	self.delay_timer = self.delay_timer.saturating_sub(1);
+	self.sound_timer = self.sound_timer.saturating_sub(1);
+    }
+
     pub fn key_down(&mut self, key: u8) {
 	match key {
 	    0..16 =>
@@ -308,7 +313,7 @@ impl<'a> CPU<'a> {
 		    if spy < 32 || self.compat == CompatLevel::XOChip {
 			for j in (0..=7).rev() {
 			    let pix_x = spx + (7 - j);
-			    let tmp = 0; //will be the previous pixel value when done
+			    let tmp = self.screen.get_pixel(pix_x, spy);
 			    if pix_x < 64 || self.compat == CompatLevel::XOChip {
 				self.screen.set_pixel(pix_x, spy,
 						      ((line >> j) & 1) ^ tmp);

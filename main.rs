@@ -53,6 +53,10 @@ fn main() {
 	.build()
 	.unwrap();
     let mut canvas = window.into_canvas().build().unwrap();
+    let timer = sdl_context.timer().unwrap();
+    let mut curtime: u64 = timer.ticks64();
+    let mut prevtime: u64 = 0;
+    let mut tick_counter: u64 = 0;
 
     canvas.set_draw_color(Color::RGB(0, 0, 255));
     canvas.clear();
@@ -143,6 +147,17 @@ fn main() {
 		},
 		_ => {}
 	    }
+	}
+
+	prevtime = curtime;
+	curtime = timer.ticks64();
+	tick_counter += curtime - prevtime;
+	'ticking: loop {
+	    if tick_counter < (1000 / 60) {
+		break 'ticking;
+	    }
+	    cpu.tick_timers();
+	    tick_counter -= 1000 / 60;
 	}
 	
 	cpu.step();
