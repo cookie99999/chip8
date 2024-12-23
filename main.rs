@@ -53,14 +53,14 @@ fn main() {
 	.build()
 	.unwrap();
     let mut canvas = window.into_canvas().build().unwrap();
-    let timer = sdl_context.timer().unwrap();
-    let mut curtime: u64 = timer.ticks64();
-    let mut prevtime: u64 = 0;
-    let mut tick_counter: u64 = 0;
-
-    canvas.set_draw_color(Color::RGB(0, 0, 255));
     canvas.clear();
-    canvas.present();
+    
+    let mut curtime = std::time::Instant::now();
+    let mut prevtime = curtime;
+    let mut tick_counter = 0;
+    let mut cycle_counter = 0;
+    let cycles_sec = 700; //todo: configurable
+    let interval = std::time::Duration::from_nanos(1000000000 / cycles_sec);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
@@ -150,16 +150,18 @@ fn main() {
 	}
 
 	prevtime = curtime;
-	curtime = timer.ticks64();
-	tick_counter += curtime - prevtime;
+	curtime = std::time::Instant::now();
+	let dtime = curtime - prevtime;
+	tick_counter += dtime.as_nanos();
+	cycle_counter += dtime.as_nanos();
 	'ticking: loop {
-	    if tick_counter < (1000 / 60) {
+	    if tick_counter < (1000000000 / 60) {
 		break 'ticking;
 	    }
 	    cpu.tick_timers();
-	    tick_counter -= 1000 / 60;
+	    tick_counter -= 1000000000 / 60;
 	}
-	
+
 	cpu.step();
 	draw_screen(&cpu.screen, &mut canvas);
 	canvas.present();
