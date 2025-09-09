@@ -1,3 +1,4 @@
+(Note: the Rust branch is newer and possibly more complete)
 # CHIP-8 in Java
 
 This is a CHIP-8 interpreter made as a learning project. It currently passes all tests in Timendus' test suite, aside from the various quirks settings as compatibility levels have not been implemented yet.
